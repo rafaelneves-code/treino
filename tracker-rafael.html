@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Treino — Rafael</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f3ee;
+    --orange: #f5a623;
+    --orange-dim: rgba(245,166,35,0.12);
+    --gray: #1c1c1c;
+    --gray2: #252525;
+    --muted: #777;
+    --border: #2a2a2a;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--black); color: var(--white); font-family: 'DM Sans', sans-serif; padding: 0; min-height: 100vh; }
+
+  .header { padding: 28px 20px 20px; border-bottom: 1px solid var(--border); }
+  .header-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); font-weight: 600; margin-bottom: 4px; }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 1px; line-height: 1; }
+  .header-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .tabs { display: flex; overflow-x: auto; padding: 14px 20px; gap: 8px; border-bottom: 1px solid var(--border); scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex-shrink: 0; padding: 7px 16px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; background: transparent; transition: all 0.15s; }
+  .tab.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+
+  .content { padding: 16px 20px; }
+
+  .date-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
+
+  .exercise { background: var(--gray); border-radius: 10px; padding: 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
+  .exercise::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--orange); }
+
+  .ex-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 19px; letter-spacing: 0.5px; line-height: 1; }
+  .ex-vol { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+
+  .inputs-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .input-group { flex: 1; }
+  .input-group label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 600; display: block; margin-bottom: 4px; }
+  .input-group input { width: 100%; background: var(--gray2); border: 1px solid var(--border); border-radius: 6px; color: var(--white); font-size: 16px; font-family: 'DM Sans', sans-serif; padding: 8px 10px; text-align: center; }
+  .input-group input:focus { outline: none; border-color: var(--orange); }
+
+  .note-input { width: 100%; background: var(--gray2); border: 1px solid var(--border); border-radius: 6px; color: var(--white); font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 8px 10px; }
+  .note-input:focus { outline: none; border-color: var(--orange); }
+  .note-input::placeholder { color: var(--muted); }
+
+  .history { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .hist-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .hist-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #1e1e1e; }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-date { font-size: 12px; color: var(--muted); }
+  .hist-right { display: flex; align-items: center; gap: 8px; }
+  .hist-val { font-size: 13px; font-weight: 500; }
+  .arrow-up { color: var(--green); font-size: 12px; }
+  .arrow-down { color: var(--red); font-size: 12px; }
+  .hist-note { font-size: 11px; color: var(--muted); font-style: italic; padding: 2px 0 4px; }
+
+  .save-btn { padding: 14px; background: var(--orange); border: none; border-radius: 10px; color: var(--black); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; flex: 1; transition: opacity 0.15s; }
+  .save-btn:active { opacity: 0.85; }
+  .btn-row { display: flex; gap: 10px; padding: 16px 20px 40px; }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a2e1a; border: 1px solid var(--green); color: var(--green); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  .empty-hist { font-size: 12px; color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Protocolo Rafael · Semana 1</div>
+  <div class="header-title">LOG DE TREINO</div>
+  <div class="header-sub" id="today-label"></div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="content" id="content"></div>
+
+<div class="btn-row">
+  <button class="save-btn" onclick="saveSession()">Salvar treino</button>
+  <button class="save-btn" style="background:var(--gray2);color:var(--orange);border:1px solid var(--orange);" onclick="exportReport()">Exportar relatório</button>
+</div>
+<div class="toast" id="toast">Treino salvo!</div>
+
+<div id="modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:999;padding:24px;overflow-y:auto;">
+  <div style="background:#1c1c1c;border-radius:12px;padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;">RELATÓRIO</span>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Copie e cole no Claude para análise.</p>
+    <textarea id="report-text" style="width:100%;height:300px;background:#111;border:1px solid #333;border-radius:8px;color:#f5f3ee;font-size:12px;font-family:monospace;padding:12px;line-height:1.6;" readonly></textarea>
+    <button onclick="copyReport()" style="margin-top:12px;width:100%;padding:12px;background:var(--orange);border:none;border-radius:8px;color:#000;font-weight:600;font-size:14px;cursor:pointer;" id="copy-btn">Copiar relatório</button>
+    <div id="clear-step1">
+      <button onclick="document.getElementById('clear-step1').style.display='none';document.getElementById('clear-step2').style.display='block';" style="margin-top:10px;width:100%;padding:12px;background:transparent;border:1px solid #f87171;border-radius:8px;color:#f87171;font-weight:500;font-size:13px;cursor:pointer;">Apagar todos os dados</button>
+    </div>
+    <div id="clear-step2" style="display:none;margin-top:10px;">
+      <p style="font-size:13px;color:#f87171;text-align:center;margin-bottom:10px;">Tem certeza? Não tem como desfazer.</p>
+      <div style="display:flex;gap:8px;">
+        <button onclick="document.getElementById('clear-step1').style.display='block';document.getElementById('clear-step2').style.display='none';" style="flex:1;padding:10px;background:transparent;border:1px solid #555;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+        <button onclick="clearAllData()" style="flex:1;padding:10px;background:#f87171;border:none;border-radius:8px;color:#000;font-weight:600;font-size:13px;cursor:pointer;">Sim, apagar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TREINOS = {
+  A: { label: 'A — Seg', exercicios: [
+    { id: 'goblet', nome: 'Goblet Squat', vol: '3×8', unit: 'kg' },
+    { id: 'supino', nome: 'Supino Reto', vol: '3×8', unit: 'kg' },
+    { id: 'hollow', nome: 'Hollow Hold', vol: '3×20s', unit: 's' },
+    { id: 'ext_lombar', nome: 'Extensão de Lombar', vol: '3×10', unit: 'kg' },
+    { id: 'elev_pernas', nome: 'Elevação de Pernas', vol: '3×10', unit: '' },
+    { id: 'manguito_a', nome: 'Manguito Rotador', vol: '3×10', unit: 'kg' },
+  ]},
+  B: { label: 'B — Ter', exercicios: [
+    { id: 'barra_fixa', nome: 'Barra Fixa', vol: '3×5', unit: '' },
+    { id: 'remada', nome: 'Remada Curvada', vol: '3×8', unit: 'kg' },
+    { id: 'desenvolvimento', nome: 'Desenvolvimento', vol: '3×8', unit: 'kg' },
+    { id: 'dead_hang', nome: 'Dead Hang', vol: '3×máx', unit: 's' },
+    { id: 'manguito_b', nome: 'Manguito Rotador', vol: '3×10', unit: 'kg' },
+  ]},
+  C: { label: 'C — Qui', exercicios: [
+    { id: 'terra', nome: 'Levantamento Terra', vol: '2×3', unit: 'kg' },
+    { id: 'stiff', nome: 'Stiff', vol: '3×8', unit: 'kg' },
+    { id: 'pallof', nome: 'Pallof Press', vol: '3×10', unit: 'kg' },
+  ]},
+  D: { label: 'D — Sex', exercicios: [
+    { id: 'paralelas', nome: 'Paralelas', vol: '3×5', unit: '' },
+    { id: 'frontal', nome: 'Agach. Frontal / Goblet', vol: '3×8', unit: 'kg' },
+    { id: 'farmer', nome: 'Farmer Walk', vol: '6×30m', unit: 'kg' },
+  ]}
+};
+
+let active = 'A';
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('rf_history') || '{}'); } catch(e) { return {}; }
+}
+function getCurrent() {
+  try { return JSON.parse(localStorage.getItem('rf_current') || '{}'); } catch(e) { return {}; }
+}
+function saveHistory(h) { localStorage.setItem('rf_history', JSON.stringify(h)); }
+function saveCurrent(c) { localStorage.setItem('rf_current', JSON.stringify(c)); }
+
+function today() {
+  return new Date().toLocaleDateString('pt-BR');
+}
+
+function render() {
+  // Date
+  const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const now = new Date();
+  document.getElementById('today-label').textContent = days[now.getDay()] + ', ' + today();
+
+  // Tabs
+  document.getElementById('tabs').innerHTML = Object.entries(TREINOS).map(([k, t]) =>
+    `<div class="tab${k===active?' active':''}" onclick="setTab('${k}')">${t.label}</div>`
+  ).join('');
+
+  // Exercises
+  const treino = TREINOS[active];
+  const hist = getHistory()[active] || [];
+  const cur = getCurrent()[active] || {};
+
+  let html = `<div class="date-label">Treino de hoje — ${today()}</div>`;
+
+  treino.exercicios.forEach(ex => {
+    const exHist = hist
+      .filter(s => s.ex && s.ex[ex.id] && (s.ex[ex.id].v || s.ex[ex.id].r))
+      .map(s => ({ date: s.date, ...s.ex[ex.id] }))
+      .reverse().slice(0, 5);
+
+    const c = cur[ex.id] || {};
+    const unitLabel = ex.unit === 'kg' ? 'Peso (kg)' : ex.unit === 's' ? 'Tempo (s)' : 'Reps';
+    const showReps = ex.unit === 'kg';
+    const showVal = ex.unit !== '';
+
+    let histHTML = '';
+    if (exHist.length) {
+      histHTML = `<div class="history"><div class="hist-title">Histórico</div>`;
+      exHist.forEach((h, i) => {
+        const prev = exHist[i+1];
+        let arrow = '';
+        if (prev && h.v && prev.v) {
+          const d = parseFloat(h.v) - parseFloat(prev.v);
+          if (d > 0) arrow = `<span class="arrow-up">↑ +${d}${ex.unit}</span>`;
+          else if (d < 0) arrow = `<span class="arrow-down">↓ ${d}${ex.unit}</span>`;
+        }
+        const repsStr = h.r ? ` · ${h.r} reps` : '';
+        const valStr = h.v ? `${h.v}${ex.unit}${repsStr}` : (h.r ? `${h.r} reps` : '—');
+        histHTML += `<div class="hist-row">
+          <span class="hist-date">${h.date}</span>
+          <div class="hist-right"><span class="hist-val">${valStr}</span>${arrow}</div>
+        </div>`;
+        if (h.note) histHTML += `<div class="hist-note">${h.note}</div>`;
+      });
+      histHTML += `</div>`;
+    }
+
+    html += `<div class="exercise">
+      <div class="ex-header">
+        <div>
+          <div class="ex-name">${ex.nome}</div>
+          <div class="ex-vol">${ex.vol}</div>
+        </div>
+      </div>
+      <div class="inputs-row">
+        ${showVal ? `<div class="input-group">
+          <label>${unitLabel}</label>
+          <input type="number" inputmode="decimal" placeholder="0" id="v_${ex.id}" value="${c.v||''}" oninput="updateCur('${ex.id}','v',this.value)">
+        </div>` : ''}
+        ${showReps ? `<div class="input-group">
+          <label>Reps feitas</label>
+          <input type="number" inputmode="numeric" placeholder="0" id="r_${ex.id}" value="${c.r||''}" oninput="updateCur('${ex.id}','r',this.value)">
+        </div>` : ''}
+        ${ex.unit==='' ? `<div class="input-group">
+          <label>Reps / Séries</label>
+          <input type="text" inputmode="numeric" placeholder="ex: 5" id="v_${ex.id}" value="${c.v||''}" oninput="updateCur('${ex.id}','v',this.value)">
+        </div>` : ''}
+      </div>
+      <input class="note-input" placeholder="Observação..." id="n_${ex.id}" value="${c.note||''}" oninput="updateCur('${ex.id}','note',this.value)">
+      ${histHTML}
+    </div>`;
+  });
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function setTab(t) { active = t; render(); }
+
+function updateCur(exId, field, val) {
+  const cur = getCurrent();
+  if (!cur[active]) cur[active] = {};
+  if (!cur[active][exId]) cur[active][exId] = {};
+  cur[active][exId][field] = val;
+  saveCurrent(cur);
+}
+
+function saveSession() {
+  const hist = getHistory();
+  const cur = getCurrent();
+  const treino = TREINOS[active];
+  const d = today();
+
+  if (!hist[active]) hist[active] = [];
+
+  const ex = {};
+  treino.exercicios.forEach(e => {
+    const c = (cur[active] || {})[e.id] || {};
+    if (c.v || c.r || c.note) ex[e.id] = { v: c.v||'', r: c.r||'', note: c.note||'' };
+  });
+
+  const idx = hist[active].findIndex(s => s.date === d);
+  if (idx >= 0) hist[active][idx] = { date: d, ex };
+  else hist[active].push({ date: d, ex });
+
+  saveHistory(hist);
+
+  if (cur[active]) { cur[active] = {}; saveCurrent(cur); }
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+  render();
+}
+
+function exportReport() {
+  const hist = getHistory();
+  let lines = ['RELATÓRIO DE TREINO — RAFAEL', '================================', ''];
+  Object.entries(TREINOS).forEach(([key, treino]) => {
+    const sessions = hist[key] || [];
+    if (!sessions.length) return;
+    lines.push('TREINO ' + treino.label.toUpperCase());
+    lines.push('---');
+    sessions.forEach(s => {
+      lines.push('Data: ' + s.date);
+      treino.exercicios.forEach(ex => {
+        const d = s.ex && s.ex[ex.id];
+        if (!d) return;
+        let row = '  ' + ex.nome + ':';
+        if (d.v) row += ' ' + d.v + ex.unit;
+        if (d.r) row += ' · ' + d.r + ' reps';
+        if (d.note) row += ' (' + d.note + ')';
+        lines.push(row);
+      });
+      lines.push('');
+    });
+  });
+  document.getElementById('report-text').value = lines.join('\n');
+  document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function copyReport() {
+  const ta = document.getElementById('report-text');
+  ta.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copy-btn');
+  btn.textContent = 'Copiado!';
+  setTimeout(() => { btn.textContent = 'Copiar relatório'; }, 2000);
+}
+
+
+function clearAllData() {
+  localStorage.removeItem('rf_history');
+  localStorage.removeItem('rf_current');
+  document.getElementById('clear-step1').style.display = 'block';
+  document.getElementById('clear-step2').style.display = 'none';
+  closeModal();
+  render();
+  const toast = document.getElementById('toast');
+  toast.textContent = 'Dados apagados!';
+  toast.classList.add('show');
+  setTimeout(() => { toast.classList.remove('show'); toast.textContent = 'Treino salvo!'; }, 2000);
+}
+
+render();
+</script>
+</body>
+</html>
