@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Treino — Rafael</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" id="app-icon">
 <style>
   :root {
     --black: #0a0a0a;
@@ -158,9 +163,15 @@ function today() {
 
 function render() {
   // Date
-  const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const dayMap = { A: { label: 'Segunda', dow: 1 }, B: { label: 'Terça', dow: 2 }, C: { label: 'Quinta', dow: 4 }, D: { label: 'Sexta', dow: 5 } };
   const now = new Date();
-  document.getElementById('today-label').textContent = days[now.getDay()] + ', ' + today();
+  const todayDow = now.getDay();
+  const targetDow = dayMap[active].dow;
+  const diff = targetDow - todayDow;
+  const targetDate = new Date(now);
+  targetDate.setDate(now.getDate() + diff);
+  const dateStr = targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  document.getElementById('today-label').textContent = dayMap[active].label + ' · ' + dateStr;
 
   // Tabs
   document.getElementById('tabs').innerHTML = Object.entries(TREINOS).map(([k, t]) =>
@@ -324,6 +335,28 @@ function clearAllData() {
   toast.classList.add('show');
   setTimeout(() => { toast.classList.remove('show'); toast.textContent = 'Treino salvo!'; }, 2000);
 }
+
+
+function generateIcon() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 180; canvas.height = 180;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 180, 180, 36);
+  ctx.fill();
+  ctx.fillStyle = '#f5a623';
+  ctx.font = 'bold 90px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('R', 90, 80);
+  ctx.font = 'bold 22px sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('TREINO', 90, 140);
+  const link = document.getElementById('app-icon');
+  if (link) link.href = canvas.toDataURL('image/png');
+}
+generateIcon();
 
 render();
 </script>
